@@ -21,7 +21,8 @@
  *   - TAB/ENTERは物理キーが余らないため、それぞれ S+D / COMMA+DOT のコンボに変更。
  *   - alt_tabはB+MINUSコンボ、Scroll層はO+Pコンボ。
  *   - マウスボタンはCornix同様J+K(MB1)/H+K(MB2)/J+K+L(MB4)のホームローコンボ。
- *   - エンコーダーは左1個のみ、回転は全レイヤーで横スクロール固定、押し込みはミュート固定。
+ *   - エンコーダーは左1個のみ、回転は全レイヤーで縦(上下)スクロール固定。
+*     押し込み(旧ミュート)は回転時の誤爆が直らないため無効化(&none)。
  *
  * ★このファイルは第3稿です。触ってみて違和感があれば都度調整してください。
  */
@@ -48,11 +49,22 @@
             bindings = <&kp GRAVE>, <&kp INT5>;
         };
 
-        // 横方向スクロール用エンコーダ回転 (CW, CCW) ※エンコーダー1個のため全レイヤー共通
-        hscroll_encoder: hscroll_encoder {
+        // 文字キー長押しで別キーを送る汎用ホールドタップ(小指外側列が無い分の代替)
+        // 使い方: &ht <長押し時のキーコード> <タップ時のキーコード>
+        ht: hold_tap_custom {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <0>;
+            flavor = "tap-preferred";
+            bindings = <&kp>, <&kp>;
+        };
+
+        // 縦方向(上下)スクロール用エンコーダ回転 (CW, CCW) ※エンコーダー1個のため全レイヤー共通
+        vscroll_encoder: vscroll_encoder {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
-            bindings = <&msc SCRL_RIGHT>, <&msc SCRL_LEFT>;
+            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
         };
     };
 
@@ -92,11 +104,6 @@
             key-positions = <26 28>; // B + MINUS (中央寄り)
         };
 
-        combo_tab {
-            bindings = <&kp TAB>;
-            key-positions = <11 12>; // S + D
-        };
-
         combo_enter {
             bindings = <&kp ENTER>;
             key-positions = <31 32>; // COMMA + DOT
@@ -114,12 +121,12 @@
         layer_base {
             display-name = "Base";
             bindings = <
-&kp Q         &kp W         &kp E         &kp R         &kp T                          &kp Y         &kp U         &kp I         &kp O         &kp P
-&kp A         &kp S         &kp D         &kp F         &kp G         &kp C_MUTE       &kp DEL       &kp H         &kp J         &kp K         &kp L         &kp SEMI
-&kp Z         &kp X         &kp C         &kp V         &kp B         &kp LSHFT        &kp MINUS     &kp N         &kp M         &kp COMMA     &kp DOT       &kp FSLH
+&ht GRAVE Q   &kp W         &kp E         &kp R         &kp T                          &kp Y         &kp U         &kp I         &kp O         &ht DEL P
+&ht TAB A     &kp S         &kp D         &kp F         &kp G         &none            &kp DEL       &kp H         &kp J         &kp K         &kp L         &ht ENTER SEMI
+&ht LSHFT Z   &kp X         &kp C         &kp V         &kp B         &kp LSHFT        &kp MINUS     &kp N         &kp M         &kp COMMA     &kp DOT       &kp FSLH
 &kp LCTRL     &kp LGUI      &kp LALT      &mo 1         &mo 4         &kp SPACE                      &kp BSPC      &mo 3         &mo 2
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_symbols {
@@ -130,7 +137,7 @@
 &kp LSHFT     &kp LS(EQUAL) &kp X         &kp SQT       &kp V         &kp LS(INT1)     &kp SQT       &kp LS(N4)    &kp LS(KP_MINUS)  &kp NUHS  &kp UP        &kp FSLH
 &kp LCTRL     &none         &none         &none         &td0          &tog 5                         &kp BSPC      &kp ENTER     &kp DEL
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_function {
@@ -141,7 +148,7 @@
 &bt BT_SEL 1  &none         &none         &none         &none         &none            &none         &none         &none         &none         &none         &none
 &bt BT_SEL 2  &none         &none         &none         &none         &none                          &none         &none         &none
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_shift_symbols {
@@ -152,7 +159,7 @@
 &kp LSHFT     &none         &none         &none         &none         &none            &none         &none         &none         &none         &none         &kp INT3
 &bt BT_SEL 2  &none         &none         &none         &none         &none                          &none         &none         &none
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_nav {
@@ -163,7 +170,7 @@
 &none         &none         &none         &none         &none         &none            &none         &none         &none         &none         &none         &none
 &none         &none         &none         &none         &none         &none                          &none         &none         &none
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_numpad {
@@ -174,7 +181,7 @@
 &kp LSHFT     &kp Z         &kp X         &kp C         &kp V         &kp LS(N9)       &kp N1        &kp N2        &kp N3        &kp N0        &kp UP        &none
 &kp LCTRL     &kp LALT      &none         &none         &none         &tog 5                         &kp BSPC      &kp ENTER     &kp DEL
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_mouse {
@@ -185,7 +192,7 @@
 &trans        &trans        &trans        &trans        &trans        &trans           &trans        &trans        &trans        &trans        &trans        &trans
 &trans        &trans        &trans        &trans        &trans        &trans                         &trans        &trans        &trans
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
 
         layer_scroll {
@@ -196,7 +203,7 @@
 &trans        &trans        &trans        &trans        &trans        &trans           &trans        &trans        &trans        &trans        &trans        &trans
 &trans        &trans        &trans        &trans        &trans        &trans                         &trans        &trans        &trans
             >;
-            sensor-bindings = <&hscroll_encoder>;
+            sensor-bindings = <&vscroll_encoder>;
         };
     };
 };
